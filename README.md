@@ -115,6 +115,7 @@ Help me create a hosted agent with the Microsoft Agent Framework that exposes on
 | [Quickstart: Deploy your first hosted agent](https://learn.microsoft.com/azure/foundry/agents/quickstarts/quickstart-hosted-agent) | Step-by-step quickstart for deploying a hosted agent to Microsoft Foundry |
 | [Foundry Hosted Agents with the Agent Framework](https://learn.microsoft.com/agent-framework/hosting/foundry-hosted-agent) | How the Microsoft Agent Framework hosts and runs agents on Foundry |
 | [Get started with the Agent Framework](https://learn.microsoft.com/agent-framework/get-started/) | Tutorials for building your first agent, adding tools, memory, and workflows |
+| [Watch the session recording](https://aka.ms/build26/BRK241/youtube) | Watch the recorded Microsoft Build session. |
 
 ### 🌟 Microsoft Learn MCP Server
 
