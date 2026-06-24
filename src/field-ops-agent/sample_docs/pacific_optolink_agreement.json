@@ -1,0 +1,63 @@
+{
+  "document": {
+    "title": "Master Services Agreement & Field Dispatch Schedule",
+    "agreement_id": "MSA-2026-PO-0291",
+    "classification": "Confidential — Supplier Agreement (RALA)",
+    "revision": "Rev B",
+    "effective_date": "2026-02-15",
+    "expiry_date": "2028-02-14",
+    "governing_region": "US West / Columbia Basin"
+  },
+  "supplier": {
+    "legal_name": "Pacific OptoLink Networks, Inc.",
+    "short_name": "Pacific OptoLink",
+    "vendor_id": "VND-PO-0291",
+    "primary_contact": "Network Dispatch",
+    "after_hours_phone": "+1-206-555-0188",
+    "noc_email": "noc@pacificoptolink.example",
+    "service_territory": ["Wenatchee East", "Quincy South", "Columbia Basin DWDM Ring"],
+    "specialties": ["DWDM line-system commissioning", "ROADM provisioning", "coherent optics turn-up", "OS2 single-mode splicing", "MPO-16 / MPO-24 trunk certification"]
+  },
+  "insurance_coi": {
+    "carrier": "Cascadia Casualty Group",
+    "policy_number": "COI-PO-77204",
+    "general_liability_usd": 3000000,
+    "professional_liability_usd": 2000000,
+    "workers_comp": "Statutory — WA L&I compliant",
+    "expiration_date": "2027-01-31",
+    "additional_insured": "Microsoft Corporation and affiliates"
+  },
+  "rate_card": [
+    {"code": "LBR-STD", "description": "Standard labor — business hours (M-F 06:00-18:00)", "unit": "per hour", "rate_usd": 158.0, "min_units": 2},
+    {"code": "LBR-AH", "description": "After-hours / weekend labor", "unit": "per hour", "rate_usd": 265.0, "min_units": 3},
+    {"code": "LBR-P1", "description": "P1 emergency dispatch (≤90m response)", "unit": "per hour", "rate_usd": 345.0, "min_units": 4},
+    {"code": "DWDM-TURN", "description": "DWDM channel turn-up & power balancing", "unit": "per channel", "rate_usd": 92.0, "min_units": 1},
+    {"code": "ROADM-PROV", "description": "ROADM degree provisioning & validation", "unit": "per degree", "rate_usd": 480.0, "min_units": 1},
+    {"code": "MPO-CERT", "description": "MPO-16/24 polarity + loss certification", "unit": "per trunk", "rate_usd": 74.0, "min_units": 1}
+  ],
+  "sla": {
+    "response_targets": [
+      {"priority": "P1 - Critical", "ack_minutes": 10, "onsite_hours": 1.5, "credit_if_missed_pct": 20},
+      {"priority": "P2 - High", "ack_minutes": 30, "onsite_hours": 6, "credit_if_missed_pct": 10},
+      {"priority": "P3 - Normal", "ack_minutes": 90, "onsite_hours": 36, "credit_if_missed_pct": 5}
+    ],
+    "monthly_availability_target_pct": 99.95,
+    "max_loss_budget_db": 2.2
+  },
+  "safety_attestation": {
+    "osha_300a_on_file": true,
+    "emr_rating": 0.69,
+    "ppe_required": ["ESD wrist strap", "Eye protection (laser-rated, Class 1M)", "Cut-resistant gloves", "Arc-flash kit for power-adjacent work"],
+    "certifications": ["BICSI Installer 2 (Optical)", "CFOS/D (DWDM specialty)", "CFOT (Certified Fiber Optic Technician)", "OSHA 10", "First Aid / CPR"],
+    "last_safety_audit": "2026-04-02",
+    "audit_result": "Pass — one advisory (laser signage refresh)"
+  },
+  "dispatch_quick_reference": {
+    "site": "Wenatchee East D-side",
+    "preferred_connector": "LC/APC Duplex",
+    "trunk_type": "MPO-16",
+    "spare_locker": "Cage locker D-1",
+    "escalation_path": ["Network Dispatch", "Pacific OptoLink NOC Lead", "Microsoft Site Reliability On-Call"],
+    "notes": "D-side runs APC end-faces on the DWDM line system — do NOT mate with UPC patch cords. Verify return loss > 60 dB before turn-up."
+  }
+}

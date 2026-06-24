@@ -45,10 +45,13 @@ def _raw_callable(fn):
 def test_document_analysis_has_supplier_and_default_keys():
     mock = worker_agent.MOCK_DOCUMENT_ANALYSIS
     assert "supplier_agreement" in mock, "supplier_agreement entry missing"
+    assert "pacific_optolink" in mock, "pacific_optolink entry missing"
     assert "default" in mock, "default entry missing"
     supplier = mock["supplier_agreement"]["extracted_data"]
     assert supplier["agreement_id"] == "MSA-2026-CF-0417"
     assert supplier["after_hours_rate_usd_per_hour"] == 235.0
+    pacific = mock["pacific_optolink"]["extracted_data"]
+    assert pacific["after_hours_rate_usd_per_hour"] == 265.0
 
 
 def test_quincy_north_connector_is_lc_upc_duplex():
@@ -64,6 +67,15 @@ def test_analyze_document_routes_supplier_pdf_to_supplier_entry():
     payload = json.loads(result)
     assert payload["status"] == "success"
     assert payload["analysis"]["document_type"] == "Supplier Agreement (RALA)"
+
+
+def test_analyze_document_routes_pacific_optolink_to_its_entry():
+    fn = _raw_callable(worker_agent.analyze_document)
+    result = fn("file:///sample_docs/pacific-optolink-agreement.pdf")
+    if not isinstance(result, str):
+        pytest.skip("analyze_document is wrapped and not directly callable in this env")
+    payload = json.loads(result)
+    assert payload["analysis"]["extracted_data"]["supplier"] == "Pacific OptoLink Networks, Inc."
 
 
 def test_analyze_document_routes_spec_sheet_to_default_entry():

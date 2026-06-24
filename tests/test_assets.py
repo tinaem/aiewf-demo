@@ -22,6 +22,7 @@ FIELD_OPS = REPO_ROOT / "src" / "field-ops-agent"
 
 JSON_FILES = [
     FIELD_OPS / "sample_docs" / "supplier_agreement.json",
+    FIELD_OPS / "sample_docs" / "pacific_optolink_agreement.json",
     FIELD_OPS / "procedural_memory_seed.json",
     FIELD_OPS / ".agent_configs" / "baseline" / "tools.json",
     FIELD_OPS / "evaluators" / "field-ops-agent" / "rubric_dimensions.json",
@@ -64,7 +65,7 @@ def test_rubric_dimensions_have_weights():
 
 
 def test_supplier_agreement_pdf_generates(tmp_path: Path):
-    """Run the PDF generator and confirm it produces a non-empty PDF."""
+    """Run the PDF generator and confirm it produces non-empty PDFs for every supplier."""
     pytest.importorskip("reportlab")
     script = FIELD_OPS / "sample_docs" / "generate_supplier_agreement_pdf.py"
     assert script.exists(), f"missing generator: {script}"
@@ -74,8 +75,30 @@ def test_supplier_agreement_pdf_generates(tmp_path: Path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
-    module.build()
-    out = module.OUT_PDF
-    assert out.exists(), "generator did not write a PDF"
-    assert out.stat().st_size > 1024, "generated PDF is suspiciously small"
-    assert out.read_bytes().startswith(b"%PDF"), "output is not a valid PDF"
+    module.build_all()
+    assert len(module.SUPPLIERS) >= 2, "expected at least two supplier sets"
+    for _src_json, out_pdf in module.SUPPLIERS:
+        assert out_pdf.exists(), f"generator did not write {out_pdf.name}"
+        assert out_pdf.stat().st_size > 1024, f"{out_pdf.name} is suspiciously small"
+        assert out_pdf.read_bytes().startswith(b"%PDF"), f"{out_pdf.name} is not a valid PDF"
+
+
+def test_index_corpus_generates():
+    """Run the Foundry IQ corpus generator and confirm it writes citable Markdown."""
+    script = FIELD_OPS / "sample_docs" / "generate_index_corpus.py"
+    assert script.exists(), f"missing generator: {script}"
+
+    spec = importlib.util.spec_from_file_location("gen_index_corpus", script)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    written = module.build_all()
+    assert len(written) >= 12, "expected at least 12 corpus files (6 topics x 2 suppliers)"
+    for path in written:
+        assert path.exists(), f"generator did not write {path.name}"
+        text = path.read_text(encoding="utf-8")
+        assert text.startswith("---"), f"{path.name} missing YAML front matter"
+        assert "supplier:" in text, f"{path.name} missing supplier field"
+        assert len(text) > 200, f"{path.name} is suspiciously short"
+

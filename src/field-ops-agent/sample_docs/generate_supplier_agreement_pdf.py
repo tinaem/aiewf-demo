@@ -1,16 +1,16 @@
-"""Generate supplier-agreement.pdf from supplier_agreement.json.
+"""Generate supplier-agreement PDFs from the supplier_*.json data files.
 
-Demo helper for BRK241 Step 3 (Content Understanding). Produces a PDF with
-tabular data (rate card, SLA matrix) that is intentionally *not* trivially
+Demo helper for BRK241 Step 3 (Content Understanding). Produces PDFs with
+tabular data (rate card, SLA matrix) that are intentionally *not* trivially
 agent-readable — exactly the kind of document Content Understanding converts
 into markdown / JSON.
 
 Usage:
     pip install reportlab
-    python generate_supplier_agreement_pdf.py
+    python generate_supplier_agreement_pdf.py     # builds every supplier set
 
-Reads:  supplier_agreement.json   (same folder)
-Writes: supplier-agreement.pdf    (same folder)
+Reads:  supplier_agreement.json, pacific_optolink_agreement.json  (same folder)
+Writes: supplier-agreement.pdf, pacific-optolink-agreement.pdf    (same folder)
 """
 
 from __future__ import annotations
@@ -34,6 +34,14 @@ from reportlab.platypus import (
 HERE = Path(__file__).resolve().parent
 SRC_JSON = HERE / "supplier_agreement.json"
 OUT_PDF = HERE / "supplier-agreement.pdf"
+
+# Supplier sets to render: (source JSON, output PDF). The default ``build()``
+# renders the first entry so existing callers/tests keep working; ``build_all()``
+# renders every supplier.
+SUPPLIERS = [
+    (SRC_JSON, OUT_PDF),
+    (HERE / "pacific_optolink_agreement.json", HERE / "pacific-optolink-agreement.pdf"),
+]
 
 ACCENT = colors.HexColor("#0F6CBD")
 LIGHT = colors.HexColor("#EAF2FB")
@@ -77,8 +85,8 @@ def _grid_table(header: list[str], rows: list[list[str]], widths: list[float]) -
     return t
 
 
-def build() -> None:
-    data = json.loads(SRC_JSON.read_text(encoding="utf-8"))
+def build(src_json: Path = SRC_JSON, out_pdf: Path = OUT_PDF) -> None:
+    data = json.loads(src_json.read_text(encoding="utf-8"))
     styles = _styles()
 
     global _BODY, _HEAD
@@ -86,7 +94,7 @@ def build() -> None:
     _HEAD = ParagraphStyle("HeadCell", parent=styles["Body"], textColor=colors.white)
 
     doc = SimpleDocTemplate(
-        str(OUT_PDF), pagesize=LETTER,
+        str(out_pdf), pagesize=LETTER,
         leftMargin=0.85 * inch, rightMargin=0.85 * inch,
         topMargin=0.8 * inch, bottomMargin=0.8 * inch,
         title=data["document"]["title"], author="Microsoft Azure Networking Operations",
@@ -173,8 +181,14 @@ def build() -> None:
     ]))
 
     doc.build(el)
-    print(f"Wrote {OUT_PDF}")
+    print(f"Wrote {out_pdf}")
+
+
+def build_all() -> None:
+    """Render every supplier set in ``SUPPLIERS``."""
+    for src_json, out_pdf in SUPPLIERS:
+        build(src_json, out_pdf)
 
 
 if __name__ == "__main__":
-    build()
+    build_all()

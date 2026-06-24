@@ -208,6 +208,31 @@ MOCK_DOCUMENT_ANALYSIS = {
             "dispatch_quick_reference": "Quincy North B-side - LC/UPC Duplex, MTP-24 trunks, spare locker B-3"
         }
     },
+    "pacific_optolink": {
+        "document_type": "Supplier Agreement (RALA)",
+        "summary": (
+            "Master Services Agreement & Field Dispatch Schedule for Pacific OptoLink Networks, Inc. "
+            "(Agreement MSA-2026-PO-0291, Rev B). Content Understanding extracted the tabular "
+            "rate card and SLA matrix into agent-ready structured data."
+        ),
+        "extracted_data": {
+            "title": "Master Services Agreement & Field Dispatch Schedule",
+            "agreement_id": "MSA-2026-PO-0291",
+            "revision": "Rev B",
+            "supplier": "Pacific OptoLink Networks, Inc.",
+            "effective": "2026-02-15 to 2028-02-14",
+            "after_hours_rate_usd_per_hour": 265.0,
+            "p1_emergency_rate_usd_per_hour": 345.0,
+            "sla_targets": [
+                "P1 - Critical: ack 10 min, on-site 1.5 h, 20% credit if missed",
+                "P2 - High: ack 30 min, on-site 6 h, 10% credit if missed",
+                "P3 - Normal: ack 90 min, on-site 36 h, 5% credit if missed"
+            ],
+            "coi": "Cascadia Casualty Group COI-PO-77204, $3M general / $2M professional, exp 2027-01-31",
+            "safety_attestation": "OSHA 300A on file, EMR 0.69, last audit 2026-04-02 (Pass - laser signage advisory)",
+            "dispatch_quick_reference": "Wenatchee East D-side - LC/APC Duplex (APC! do not mate with UPC), MPO-16 trunks, spare locker D-1"
+        }
+    },
     "default": {
         "document_type": "Technical Specification",
         "summary": "Document analyzed successfully. Key findings extracted.",
@@ -295,7 +320,9 @@ def analyze_document(document_url: str, analysis_type: str = "summary") -> str:
         analysis_type: Type of analysis - 'summary', 'extract_specs', 'compliance_check'.
     """
     url_lower = document_url.lower()
-    if "supplier" in url_lower or "agreement" in url_lower or "msa" in url_lower or "cascade" in url_lower:
+    if "pacific" in url_lower or "optolink" in url_lower:
+        key = "pacific_optolink"
+    elif "supplier" in url_lower or "agreement" in url_lower or "msa" in url_lower or "cascade" in url_lower:
         key = "supplier_agreement"
     else:
         key = "default"

@@ -16,7 +16,7 @@ Foundry / Fabric services.
 | --- | --- | --- | --- |
 | **Toolbox** | One MCP endpoint that serves portal-configured tools (Work IQ, Foundry IQ / AI Search, Web Search, Code Interpreter) | `TOOLBOX_ENDPOINT` | Local `@tool` functions only |
 | **Work IQ** | Work-order / task system, surfaced as a Toolbox tool | (inside Toolbox) | `search_work_iq` mock in `worker_agent.py` |
-| **Foundry IQ** | Indexed documents (AI Search) — e.g. the supplier agreement | (inside Toolbox) | `analyze_document` mock + `sample_docs/` |
+| **Foundry IQ** | Indexed documents (AI Search) — e.g. the supplier agreement; **Toolbox tool must be named `supplier_docs`** | (inside Toolbox) | `analyze_document` mock + `sample_docs/` |
 | **Fabric IQ** | Natural-language query over OneLake telemetry (Fabric data agent) | `FABRIC_*` vars | `query_site_reliability` mock |
 | **Procedural memory** | Foundry Memory Store of learned procedures | `PROCEDURAL_MEMORY_*` | `procedural_memory_seed.json` |
 
@@ -55,28 +55,120 @@ No keys in the repo.
 
 ## 2. Foundry IQ — indexed documents (the supplier agreement)
 
-Foundry IQ is an **AI Search index** of your documents, exposed through Toolbox.
-The demo's document is the supplier agreement under
-[`sample_docs/`](sample_docs/).
+Foundry IQ is a **knowledge base** (powered by Azure AI Search *agentic
+retrieval*) that the agent reaches through a Toolbox MCP tool. It's a 4-object
+chain — get the names right and the wiring is trivial:
 
-**Set up:**
-1. Generate the demo PDF (or use your own documents):
-   ```bash
-   python sample_docs/generate_supplier_agreement_pdf.py
-   ```
-2. Upload the document(s) to the blob/data source behind your AI Search index.
-3. In the portal, create/refresh the index and add it to your Toolbox.
+```
+documents in a data store        ← what you upload (PDF/DOCX/JSON…)
+        │  (indexer chunks + embeds)
+        ▼
+Azure AI Search index            ← e.g.  supplier-docs-index
+        │  (referenced by)
+        ▼
+knowledge source                 ← e.g.  supplier-docs-ks
+        │  (added to)
+        ▼
+knowledge base                   ← e.g.  supplier-docs-kb   → exposes an MCP endpoint
+        │  (surfaced through Toolbox as a tool)
+        ▼
+Toolbox tool the agent calls     ← MUST be named  supplier_docs
+```
 
-**Data shape / naming:** AI Search defines the schema, not this repo. For the
-demo punchline to land, the indexed content must contain the dispatch facts the
-agent quotes — connector `LC/UPC Duplex`, after-hours rate `$235/hr`, etc. The
-canonical source for those values is
-[`sample_docs/supplier_agreement.json`](sample_docs/supplier_agreement.json);
-keep your real document consistent with it (or edit both).
+### ⚠️ The one name that must match: `supplier_docs`
 
-The local fallback is `analyze_document` in `worker_agent.py`, which routes any
-URL containing `supplier`/`agreement`/`msa`/`cascade` to the bundled supplier
-data and everything else to a generic spec sheet.
+This agent's instructions
+([`.agent_configs/baseline/instructions.md`](.agent_configs/baseline/instructions.md))
+tell the model, verbatim:
+
+> *"…call `supplier_docs` (from the Foundry Toolbox) … Cite filenames in your answer."*
+
+So the tool the Toolbox exposes for this knowledge base **must be named
+`supplier_docs`**. The index / knowledge-source / knowledge-base names above are
+your choice — only the **tool name** is load-bearing. If your Toolbox names the
+retrieval tool something else (the quickstart default is
+`knowledge_base_retrieve`), either rename it to `supplier_docs` in the Toolbox,
+or change every `supplier_docs` reference in `instructions.md` to match. Mismatch
+= the model calls a tool that doesn't exist and silently falls back.
+
+### Ready-to-upload documents
+
+This repo ships the document corpus for you — **12 Markdown files** (6 topics ×
+2 suppliers) under [`sample_docs/index_corpus/`](sample_docs/index_corpus/).
+They carry YAML front matter (supplier, vendor_id, agreement_id, document_type,
+dates) and human-readable filenames that double as citations. Regenerate them
+from the supplier JSON anytime:
+
+```pwsh
+python sample_docs/generate_index_corpus.py
+```
+
+Upload everything in that folder to the data store behind `supplier-docs-index`.
+See [`sample_docs/index_corpus/README.md`](sample_docs/index_corpus/README.md)
+for portal and `az storage blob upload-batch` instructions.
+
+### Set up (portal — fastest)
+
+1. Sign in to [Microsoft Foundry](https://ai.azure.com/) with **New Foundry**
+   on, open your project, choose **Build → Knowledge**.
+2. Create or connect a **search service that supports agentic retrieval**.
+3. Upload your documents (see shape below) to the backing data store and let the
+   indexer build the index (e.g. `supplier-docs-index`).
+4. **Create a knowledge source** over that index (e.g. `supplier-docs-ks`). In
+   its `sourceDataFields`, include the **file-name field** — that's what powers
+   the "cite filenames" instruction.
+5. **Create a knowledge base** (e.g. `supplier-docs-kb`) that references the
+   knowledge source.
+6. Add the knowledge base to your **Toolbox** and **name the exposed tool
+   `supplier_docs`**. Set `TOOLBOX_ENDPOINT` (see section 1).
+7. Grant the agent's managed identity read access on the search service
+   (agentic-identity auth — no stored key).
+
+Programmatic path (REST/SDK) and the end-to-end automation are documented here:
+- [What is Foundry IQ? (workflow)](https://learn.microsoft.com/azure/foundry/agents/concepts/what-is-foundry-iq#workflow)
+- [Quickstart: Foundry IQ knowledge base + toolbox for a hosted agent](https://learn.microsoft.com/azure/foundry/agents/quickstarts/quickstart-foundry-iq-hosted-agent)
+- [Create a search-index knowledge source](https://learn.microsoft.com/azure/search/agentic-knowledge-source-how-to-search-index)
+
+### What documents to put in it (and how to name them)
+
+The agent is built to answer per-subcontractor questions — *contract, insurance,
+rates, certifications, safety attestations, dispatch quick-reference*. Load **one
+set of documents per supplier**. The repo ships **two** suppliers as canonical
+examples:
+
+- **Cascade Fiber** —
+  [`sample_docs/supplier_agreement.json`](sample_docs/supplier_agreement.json)
+  (structured source of truth) →
+  [`sample_docs/supplier-agreement.pdf`](sample_docs/supplier-agreement.pdf).
+- **Pacific OptoLink** —
+  [`sample_docs/pacific_optolink_agreement.json`](sample_docs/pacific_optolink_agreement.json)
+  → `sample_docs/pacific-optolink-agreement.pdf`.
+
+Regenerate both PDFs with `python sample_docs/generate_supplier_agreement_pdf.py`
+(it renders every entry in the module's `SUPPLIERS` list). Add more suppliers by
+copying a JSON file, editing the values, and appending a `(json, pdf)` row to
+`SUPPLIERS`.
+
+**File-naming tip:** because the agent cites filenames, give each document a
+human-readable, supplier-prefixed name so citations read well, e.g.
+`cascade-fiber-msa-2026-CF-0417.pdf`, `cascade-fiber-coi-2026.pdf`,
+`pacific-optolink-msa-2026-PO-0291.pdf`, `pacific-optolink-rate-card.pdf`.
+
+**Content the demo punchlines depend on:** the indexed content must contain the
+dispatch facts the agent quotes — for Cascade Fiber: connector `LC/UPC Duplex`,
+after-hours rate `$235/hr`, P1 rate `$310/hr`; for Pacific OptoLink: connector
+`LC/APC Duplex` (APC, not UPC), after-hours rate `$265/hr`, P1 rate `$345/hr`.
+Keep your real documents consistent with the JSON sources (or edit both
+together).
+
+### Local fallback
+
+No Toolbox configured? `analyze_document` in
+[`worker_agent.py`](worker_agent.py) routes any URL containing
+`pacific`/`optolink` to the Pacific OptoLink data,
+`supplier`/`agreement`/`msa`/`cascade` to the Cascade Fiber data, and everything
+else to a generic spec sheet — so the demo runs offline for both suppliers.
+
 
 ---
 
