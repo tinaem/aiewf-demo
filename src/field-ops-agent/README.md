@@ -83,6 +83,11 @@ azd deploy field-ops-agent
 | `TOOLBOX_ENDPOINT` | no | Toolbox MCP URL — when set, Toolbox tools appear in the agent |
 | `FOUNDRY_AGENT_TOOLBOX_FEATURES` | no | Toolbox feature-flag header (default `Toolboxes=V1Preview`) |
 
+> Wiring the agent to the **real** Work IQ / Foundry IQ / Fabric IQ / memory
+> services (instead of the built-in sample data)? See
+> [SETUP-INTEGRATIONS.md](SETUP-INTEGRATIONS.md) for the full env-var matrix and
+> the data shapes each one expects.
+
 ## Walkthrough talking points (suggested order)
 
 1. **`agent.yaml`** — "One YAML file. Foundry hosts this."
