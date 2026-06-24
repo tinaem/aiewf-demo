@@ -1,0 +1,63 @@
+{
+  "document": {
+    "title": "Master Services Agreement & Field Dispatch Schedule",
+    "agreement_id": "MSA-2026-CF-0417",
+    "classification": "Confidential — Supplier Agreement (RALA)",
+    "revision": "Rev D",
+    "effective_date": "2026-01-01",
+    "expiry_date": "2027-12-31",
+    "governing_region": "US West / Quincy Metro"
+  },
+  "supplier": {
+    "legal_name": "Cascade Fiber Services, LLC",
+    "short_name": "Cascade Fiber",
+    "vendor_id": "VND-CF-0417",
+    "primary_contact": "Dispatch Desk",
+    "after_hours_phone": "+1-509-555-0142",
+    "noc_email": "dispatch@cascadefiber.example",
+    "service_territory": ["Quincy North", "Quincy South", "East WA Fiber Ring"],
+    "specialties": ["OS2 single-mode splicing", "QSFP-DD field replacement", "OTDR loss certification", "MTP/MPO trunk dressing"]
+  },
+  "insurance_coi": {
+    "carrier": "Northwest Mutual Surety",
+    "policy_number": "COI-CF-99431",
+    "general_liability_usd": 2000000,
+    "professional_liability_usd": 1000000,
+    "workers_comp": "Statutory — WA L&I compliant",
+    "expiration_date": "2026-12-31",
+    "additional_insured": "Microsoft Corporation and affiliates"
+  },
+  "rate_card": [
+    {"code": "LBR-STD", "description": "Standard labor — business hours (M-F 07:00-18:00)", "unit": "per hour", "rate_usd": 145.0, "min_units": 2},
+    {"code": "LBR-AH", "description": "After-hours / weekend labor", "unit": "per hour", "rate_usd": 235.0, "min_units": 3},
+    {"code": "LBR-P1", "description": "P1 emergency dispatch (≤2h response)", "unit": "per hour", "rate_usd": 310.0, "min_units": 4},
+    {"code": "SPL-FUS", "description": "Fusion splice — certified, per strand", "unit": "per strand", "rate_usd": 38.5, "min_units": 1},
+    {"code": "OTDR-CERT", "description": "OTDR bi-directional loss certification", "unit": "per link", "rate_usd": 62.0, "min_units": 1},
+    {"code": "TRK-DRS", "description": "MTP-24 trunk dressing & labeling", "unit": "per tray", "rate_usd": 410.0, "min_units": 1}
+  ],
+  "sla": {
+    "response_targets": [
+      {"priority": "P1 - Critical", "ack_minutes": 15, "onsite_hours": 2, "credit_if_missed_pct": 15},
+      {"priority": "P2 - High", "ack_minutes": 30, "onsite_hours": 8, "credit_if_missed_pct": 10},
+      {"priority": "P3 - Normal", "ack_minutes": 120, "onsite_hours": 48, "credit_if_missed_pct": 5}
+    ],
+    "monthly_availability_target_pct": 99.9,
+    "max_loss_budget_db": 2.5
+  },
+  "safety_attestation": {
+    "osha_300a_on_file": true,
+    "emr_rating": 0.78,
+    "ppe_required": ["ESD wrist strap", "Eye protection (laser-rated)", "Cut-resistant gloves", "Arc-flash kit for power-adjacent work"],
+    "certifications": ["BICSI Installer 2 (Optical)", "CFOT (Certified Fiber Optic Technician)", "OSHA 10", "First Aid / CPR"],
+    "last_safety_audit": "2026-03-12",
+    "audit_result": "Pass — no findings"
+  },
+  "dispatch_quick_reference": {
+    "site": "Quincy North B-side",
+    "preferred_connector": "LC/UPC Duplex",
+    "trunk_type": "MTP-24",
+    "spare_locker": "Cage locker B-3",
+    "escalation_path": ["Dispatch Desk", "Cascade NOC Lead", "Microsoft Site Reliability On-Call"],
+    "notes": "B-side upgraded to 400G-capable structured cabling Q1 2026. Confirm IL < 0.15 dB on all trunks before sign-off."
+  }
+}

@@ -108,8 +108,15 @@ perspective."*
 > not very agent-readable. Content Understanding uses a specialized model to turn that PDF into an
 > agent-ready format: tables, markdown, figures, or raw JSON."
 
-**What to show:** the supplier-agreement PDF → markdown/JSON conversion. Tie it back to the
-`analyze_document` placeholder `@tool` in [`worker_agent.py`](worker_agent.py).
+**What to show:** the supplier-agreement PDF → markdown/JSON conversion. Use the bundled sample
+[`sample_docs/supplier-agreement.pdf`](sample_docs/supplier-agreement.pdf) — a Cascade Fiber MSA
+with tabular rate-card and SLA data that is intentionally *not* trivially agent-readable. Tie it
+back to the `analyze_document` placeholder `@tool` in [`worker_agent.py`](worker_agent.py).
+
+> 🛠️ **Regenerate the PDF:** it's built from
+> [`sample_docs/supplier_agreement.json`](sample_docs/supplier_agreement.json) via
+> `python sample_docs/generate_supplier_agreement_pdf.py` (`pip install reportlab`). Edit the JSON
+> and re-run to change the document.
 
 ---
 
