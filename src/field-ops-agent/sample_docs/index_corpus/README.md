@@ -33,8 +33,14 @@ The three Foundry IQ objects (see `../../SETUP-INTEGRATIONS.md` §2) chain like 
 index_corpus/*.md ──► supplier-docs-index ──► supplier-docs-ks ──► supplier-docs-kb
    (these files)        (Azure AI Search)      (knowledge source)   (knowledge base)
                                                                           │
-                                                          Toolbox tool name: supplier_docs
+                                              Toolbox: supplier-docs (hyphen) ──┐
+                                                                          │     │
+                                              Tool inside it: supplier_docs (underscore)
 ```
+
+> ⚠️ The **toolbox** is a resource → hyphens only (`supplier-docs`); the portal
+> rejects `supplier_docs` there. The **tool** inside it is `supplier_docs`
+> (underscore) — that's the name the agent's instructions call.
 
 ### Option A — Portal upload (fastest for the demo)
 
@@ -57,12 +63,15 @@ Then run the indexer that feeds `supplier-docs-index`.
 
 ### After upload
 
-1. Create the knowledge source `supplier-docs-ks` over `supplier-docs-index`. In
+1. Create the knowledge source `supplier-docs-ks` over the index. In
    **sourceDataFields**, include the **file-name field** so citations resolve.
+   (A blob-backed knowledge source auto-creates `supplier-docs-ks-index`.)
 2. Create the knowledge base `supplier-docs-kb` referencing `supplier-docs-ks`.
-3. Expose it through the Toolbox MCP endpoint with the tool name **exactly** `supplier_docs`.
-   The default quickstart name is `knowledge_base_retrieve` — renaming is required or the
-   agent silently falls back to its offline mock.
+3. Expose it through the Toolbox with the tool's `name` field set **exactly** to
+   `supplier_docs` (underscores are allowed in tool names — only *resource* names
+   like `supplier-docs-kb` must use hyphens). The quickstart default is
+   `knowledge_base_retrieve`; if you don't override `name`, the agent silently
+   falls back to its offline mock. See `../../SETUP-INTEGRATIONS.md` §2.
 
 ## What's in each file
 

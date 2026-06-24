@@ -85,11 +85,52 @@ tell the model, verbatim:
 
 So the tool the Toolbox exposes for this knowledge base **must be named
 `supplier_docs`**. The index / knowledge-source / knowledge-base names above are
-your choice — only the **tool name** is load-bearing. If your Toolbox names the
-retrieval tool something else (the quickstart default is
-`knowledge_base_retrieve`), either rename it to `supplier_docs` in the Toolbox,
-or change every `supplier_docs` reference in `instructions.md` to match. Mismatch
-= the model calls a tool that doesn't exist and silently falls back.
+your choice — only the **tool name** is load-bearing.
+
+#### Tool names vs. resource names — two different rule sets
+
+These are *separate namespaces*; don't confuse them:
+
+| | Rule | Examples used here |
+| --- | --- | --- |
+| **Resource names** (toolbox, connection, index, knowledge source, knowledge base) | Alphanumeric, hyphens allowed in the middle, must start/end alphanumeric — **no underscores** | `supplier-docs` (toolbox), `supplier-docs-search`, `supplier-docs-ks`, `supplier-docs-kb`, `supplier-docs-ks-index` |
+| **Tool name** (the string the model invokes) | Set via the tool definition's optional `name` field — **underscores are allowed** | `supplier_docs` |
+
+Underscores in tool names are normal (the Foundry IQ quickstart's own default is
+`knowledge_base_retrieve`). So `supplier_docs` is a **valid** tool name — it does
+*not* need to become `supplier-docs`.
+
+> ⚠️ **Don't name the Toolbox `supplier_docs`.** The portal's **Create toolbox →
+> Name** field is a resource name and will reject the underscore with *"Toolbox
+> name must start and end with alphanumeric characters and can contain hyphens in
+> the middle."* Name the **toolbox** `supplier-docs` (hyphen); name the **tool
+> inside it** `supplier_docs` (underscore).
+
+#### How to set the tool name to `supplier_docs`
+
+When you add the knowledge base / search index to the Toolbox, set the tool
+definition's `name` field explicitly:
+
+```jsonc
+{
+  "type": "azure_ai_search",        // (or the knowledge-base tool type)
+  "name": "supplier_docs",           // ← the load-bearing tool name
+  "description": "Hybrid semantic + keyword retrieval over supplier docs.",
+  "azure_ai_search": {
+    "indexes": [
+      { "index_name": "supplier-docs-ks-index", "project_connection_id": "supplier-docs-search" }
+    ]
+  }
+}
+```
+
+For first-party tool types (`azure_ai_search`, `web_search`, knowledge base) the
+exposed name **is** the `name` field value — no prefix. (Only *remote MCP server*
+tools get a `server_label.` prefix, e.g. `myserver.some_tool`.) If you instead
+accept the quickstart default (`knowledge_base_retrieve`), either set `name:
+supplier_docs` as above **or** change every `supplier_docs` reference in
+`instructions.md` to match. Mismatch = the model calls a tool that doesn't exist
+and silently falls back to its offline mock.
 
 ### Ready-to-upload documents
 
@@ -119,9 +160,18 @@ for portal and `az storage blob upload-batch` instructions.
    the "cite filenames" instruction.
 5. **Create a knowledge base** (e.g. `supplier-docs-kb`) that references the
    knowledge source.
-6. Add the knowledge base to your **Toolbox** and **name the exposed tool
-   `supplier_docs`**. Set `TOOLBOX_ENDPOINT` (see section 1).
-7. Grant the agent's managed identity read access on the search service
+6. **Create a Toolbox.** On the **Create toolbox** screen, the **Name** field is
+   a *resource* name — give it a **hyphenated** name like `supplier-docs`.
+
+   > ⚠️ **Common mistake:** Do **not** type `supplier_docs` here. The portal
+   > rejects it with *"Toolbox name must start and end with alphanumeric
+   > characters and can contain hyphens in the middle."* That underscore name is
+   > the **tool** name, set in the next step — not the toolbox name.
+
+7. Add the knowledge base to that Toolbox and set the **exposed tool's name** to
+   **exactly `supplier_docs`** (underscore — this is the string `instructions.md`
+   calls). Set `TOOLBOX_ENDPOINT` (see section 1).
+8. Grant the agent's managed identity read access on the search service
    (agentic-identity auth — no stored key).
 
 Programmatic path (REST/SDK) and the end-to-end automation are documented here:
