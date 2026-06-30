@@ -336,16 +336,35 @@ real URL never lands in git — it stays in your gitignored `.env`:
   value: ${TOOLBOX_ENDPOINT}   # resolved from your azd env at deploy time
 ```
 
-Set the value in your azd environment, then deploy — azd injects it into the
+`<project-endpoint>` is your Foundry project endpoint —
+`https://<account>.services.ai.azure.com/api/projects/<project>`. It's the same
+value `azd` stored as `FOUNDRY_PROJECT_ENDPOINT` during provisioning, so you can
+read it straight back instead of hand-typing it:
+
+```pwsh
+$projectEndpoint = azd env get-value FOUNDRY_PROJECT_ENDPOINT
+```
+
+Set the Toolbox MCP URL in your azd environment, then deploy — azd resolves the
+`${TOOLBOX_ENDPOINT}` token in `agent.yaml` and injects the value into the
 container:
 
 ```pwsh
-azd env set TOOLBOX_ENDPOINT "<project-endpoint>/toolboxes/supplier-docs/mcp?api-version=v1"
+azd env set TOOLBOX_ENDPOINT "$projectEndpoint/toolboxes/supplier-docs/mcp?api-version=v1"
 azd deploy field-ops-agent
+```
+
+Confirm it took effect (both checks should show the same MCP URL):
+
+```pwsh
+azd env get-value TOOLBOX_ENDPOINT          # what azd will inject
+azd env get-values | Select-String TOOLBOX  # sanity-check the resolved env
 ```
 
 > If you remove the entry from `agent.yaml`, setting the azd variable alone has no
 > effect — the container only receives variables declared in `environment_variables`.
+> Likewise, `azd env set` alone changes nothing already running: the value is only
+> injected on the next `azd deploy`.
 
 **Step 8 — Smoke test** (MCP `tools/list` then `tools/call`): the endpoint should
 advertise `supplier_docs` (no prefix) and return supplier document text. Then ask
