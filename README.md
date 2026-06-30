@@ -38,6 +38,31 @@ Developer CLI.
 - The Foundry agents extension: `azd extension install azure.ai.agents`
 - Python 3.12+
 
+**Required permissions**
+
+`azd provision` creates the Foundry project, model deployment, ACR, storage, and
+App Insights — and assigns Azure RBAC role assignments to the agent and project
+identities. To run the full deploy you need:
+
+| Role | Scope | Why |
+|:-----|:------|:----|
+| **Contributor** | Subscription (or target resource group) | Provision and manage the Azure resources. |
+| **User Access Administrator** *(or **Owner** instead of both)* | Subscription (or resource group) | The Bicep templates create `Microsoft.Authorization/roleAssignments`; Contributor alone cannot write role assignments and `azd provision` will fail with `AuthorizationFailed`. |
+| **Foundry Owner** | Subscription / Foundry account | Required because `azd provision` creates a **new** Foundry project. |
+| **Foundry Project Manager** | Foundry project | Create and deploy the hosted agents, and assign **Foundry User** to the platform-created agent identity at deploy time. |
+
+> The `azd` tooling assigns the remaining runtime roles automatically —
+> **Container Registry Repository Reader** for the project managed identity and
+> **Foundry User** for each agent's Entra identity. Optional integrations
+> (Search, Storage, Teams) need extra role grants on the agent's identity; those
+> are documented in
+> [`src/field-ops-agent/SETUP-INTEGRATIONS.md`](src/field-ops-agent/SETUP-INTEGRATIONS.md)
+> and [`src/fibey-coordinator/TEAMS-SETUP.md`](src/fibey-coordinator/TEAMS-SETUP.md).
+> The Foundry roles above were previously named **Azure AI Owner** / **Azure AI
+> Project Manager** / **Azure AI User** — you may still see the old names during
+> the rename rollout. See
+> [Hosted agent permissions reference](https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agent-permissions).
+
 **Clone and deploy**
 
 ```bash

@@ -46,6 +46,15 @@ if (Has "az") {
     }
 }
 
+# 5. Required permissions (cannot be fully verified here — reminder only)
+Write-Host ""
+Write-Host "Permissions needed to deploy (azd provision/deploy):" -ForegroundColor Cyan
+Write-Host "  - Contributor + User Access Administrator (or Owner) on the subscription/resource group"
+Write-Host "    (provisioning creates Azure RBAC role assignments — Contributor alone fails)"
+Write-Host "  - Foundry Owner (creates a new Foundry project)"
+Write-Host "  - Foundry Project Manager on the project (deploy hosted agents)"
+Write-Host "  Docs: https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agent-permissions"
+
 Write-Host ""
 Write-Host "Summary: $ok passed, $warn warning(s), $fail failure(s)" -ForegroundColor Cyan
 

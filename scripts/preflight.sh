@@ -52,6 +52,15 @@ if has az; then
     fi
 fi
 
+# 5. Required permissions (cannot be fully verified here — reminder only)
+echo ""
+printf "${cyan}Permissions needed to deploy (azd provision/deploy):${nc}\n"
+echo "  - Contributor + User Access Administrator (or Owner) on the subscription/resource group"
+echo "    (provisioning creates Azure RBAC role assignments — Contributor alone fails)"
+echo "  - Foundry Owner (creates a new Foundry project)"
+echo "  - Foundry Project Manager on the project (deploy hosted agents)"
+echo "  Docs: https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agent-permissions"
+
 echo ""
 printf "${cyan}Summary: %s passed, %s warning(s), %s failure(s)${nc}\n" "$ok" "$warn" "$fail"
 
