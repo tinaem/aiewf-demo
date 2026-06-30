@@ -55,7 +55,7 @@ az login
 azd provision
 ```
 
-After provisioning, set your tenant ID so the post-deploy RBAC hook can authenticate:
+After provisioning, set your tenant ID so `azd deploy` can complete the agent's RBAC setup:
 
 ```bash
 # Bash / macOS / Linux
@@ -77,8 +77,9 @@ Durable Task Scheduler).
 
 > **Wiring the `supplier_docs` knowledge tool (Foundry IQ):** `azd provision` /
 > `azd deploy` create the agents, but the supplier-docs knowledge tool needs a few
-> extra steps (embedding model, corpus upload, knowledge source/base, toolbox, and
-> a role grant). Follow the **End-to-end deployment runbook** in
+> extra steps (embedding model, corpus upload, knowledge source/base, toolbox, a
+> role grant, and wiring `TOOLBOX_ENDPOINT` + redeploy). Follow the **End-to-end
+> deployment runbook** in
 > [`src/field-ops-agent/SETUP-INTEGRATIONS.md`](src/field-ops-agent/SETUP-INTEGRATIONS.md)
 > §2 — otherwise the agent answers from its offline mock.
 
