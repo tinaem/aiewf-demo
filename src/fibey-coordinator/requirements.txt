@@ -1,5 +1,6 @@
-agent-framework==1.6.0
-agent-framework-foundry==1.0.1
+agent-framework-core==1.9.0
+agent-framework-openai==1.8.2
+agent-framework-foundry==1.8.2
 azure-ai-agentserver-core[tracing]==2.0.0b3
 azure-ai-agentserver-responses==1.0.0b5
 azure-identity>=1.19.0
@@ -8,5 +9,10 @@ durabletask>=1.4.0
 durabletask-azuremanaged>=1.4.0
 aiohttp>=3.9.0
 azure-storage-blob>=12.19.0
-agent-framework-durabletask>=1.0.0b260521
+# Pinned (not >=): newer prereleases (e.g. 1.0.0b260630) require
+# agent-framework-core>=1.10.0, which conflicts with the pinned core==1.9.0
+# above and makes pip backtrack into the agent-framework-core[all] extra that
+# pulls agent-framework-hyperlight / hyperlight-sandbox-backend-wasm (no
+# distribution for the hosted build platform) → ResolutionImpossible.
+agent-framework-durabletask==1.0.0b260521
 requests>=2.31.0
